@@ -150,12 +150,10 @@
 			"args": ["nodebot", "#ubuntu", "+CLcntjf", "5:10", "#ubuntu-unregged"]
 		},
 		"PING mynick": {
-			"prefix": "pratchett.freenode.net",
-			"server": "pratchett.freenode.net",
-			"command": "rpl_channelmodeis",
-			"rawCommand": "324",
-			"commandType": "reply",
-			"args": ["nodebot", "#ubuntu", "+CLcntjf", "5:10", "#ubuntu-unregged"]
+			"args": [ "mynick" ],
+			"commandType": "normal",
+			"command": "PING",
+			"rawCommand": "PING"
 		}
 	},
 	"433-before-001": {
