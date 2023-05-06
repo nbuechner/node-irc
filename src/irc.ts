@@ -1364,7 +1364,7 @@ export class Client extends (EventEmitter as unknown as new () => TypedEmitter<C
             }
             const message = parseMessage(line, {
                 stripColors: this.opt.stripColors,
-                supportsMessageTags: true,
+                supportsMessageTags: this.state.capabilities.isSupported('message-tags'),
             });
             try {
                 this.emit('raw', message);

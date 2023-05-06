@@ -16,12 +16,17 @@ export interface Message {
 
 interface ParserOptions {
     supportsMessageTags: boolean;
+    /**
+     * @param stripColors If true, strip IRC colors.
+     */
     stripColors: boolean;
 }
 
-const IRC_LINE_MATCH = /^:(?<prefix>[^ ]+) +(?<content>.+)/;
+const IRC_LINE_MATCH_REGEX = /^:(?<prefix>[^ ]+) +(?<content>.+)/;
+const IRC_LINE_MATCH_WITH_TAGS_REGEX = /^(?<tags>@[^ ]+ )?:(?<prefix>[^ ]+) +(?<content>.+)/;
 
-const IRC_LINE_MATCH_WITH_TAGS = /^(?<tags>@[^ ]+ )?:(?<prefix>[^ ]+) +(?<content>.+)/;
+const IRC_COMMAND_REGEX = /^([^ ]+) */;
+
 
 /**
  * parseMessage(line, stripColors)
@@ -29,7 +34,8 @@ const IRC_LINE_MATCH_WITH_TAGS = /^(?<tags>@[^ ]+ )?:(?<prefix>[^ ]+) +(?<conten
  * takes a raw "line" from the IRC server and turns it into an object with
  * useful keys
  * @param line Raw message from IRC server.
- * @param stripColors If true, strip IRC colors.
+ * @param opts Additional options for parsing.
+ *             For legacy reasons this can be a boolean which maps to the `stripColors` propety.
  * @return A parsed message object.
  */
 export function parseMessage(line: string, opts: Partial<ParserOptions>|boolean = false): Message {
@@ -49,40 +55,42 @@ export function parseMessage(line: string, opts: Partial<ParserOptions>|boolean 
     }
 
     // Parse prefix
-    let match = line.match(opts.supportsMessageTags ? IRC_LINE_MATCH_WITH_TAGS : IRC_LINE_MATCH);
-    if (!match) {
-        // Unparseable format.
-        throw Error(`Invalid format, could not parse message '${line}''`);
-    }
+    let match = line.match(opts.supportsMessageTags ? IRC_LINE_MATCH_WITH_TAGS_REGEX : IRC_LINE_MATCH_REGEX);
+    let content = line;
+    if (match) {
+        const { prefix, tags, content: ctnt } = match.groups || {};
+        content = ctnt;
+        if (!prefix) {
+            throw Error('No prefix on message');
+        }
+        message.prefix = prefix;
+        const prefixMatch = message.prefix.match(/^([_a-zA-Z0-9\[\]\\`^{}|-]*)(!([^@]+)@(.*))?$/);
 
-    const { prefix, tags, content } = match.groups || {};
-    if (!prefix) {
-        throw Error('No prefix on message');
-    }
-    message.prefix = prefix;
-    const prefixMatch = message.prefix.match(/^([_a-zA-Z0-9\[\]\\`^{}|-]*)(!([^@]+)@(.*))?$/);
+        if (prefixMatch) {
+            message.nick = prefixMatch[1];
+            message.user = prefixMatch[3];
+            message.host = prefixMatch[4];
+        }
+        else {
+            message.server = message.prefix;
+        }
 
-    if (prefixMatch) {
-        message.nick = prefixMatch[1];
-        message.user = prefixMatch[3];
-        message.host = prefixMatch[4];
+        // Parse the message tags
+        if (tags) {
+            message.tags = new Map(
+                // Strip @
+                tags.substring(1).trim().split(';').map(
+                    (tag) => tag.split('=', 2)
+                ) as Array<[string, string|undefined]>
+            );
+        }
     }
     else {
-        message.server = message.prefix;
-    }
-
-    // Parse the message tags
-    if (tags) {
-        message.tags = new Map(
-            // Strip @
-            tags.substring(1).trim().split(';').map(
-                (tag) => tag.split('=', 2)
-            ) as Array<[string, string|undefined]>
-        );
+        // Still allowed, it might just be a command
     }
 
     // Parse command
-    match = content.match(/^([^ ]+) */);
+    match = content.match(IRC_COMMAND_REGEX);
 
     if (!match?.[1]) {
         throw Error('Could not parse command');

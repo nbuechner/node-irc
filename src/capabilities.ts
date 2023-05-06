@@ -67,6 +67,10 @@ export class IrcCapabilities extends (EventEmitter as new () => IrcCapabilitiesE
         return this.userCapabilites.ready;
     }
 
+    public isSupported(capability: string) {
+        return this.userCapabilites.caps.has(capability);
+    }
+
     public get supportsSasl() {
         if (!this.serverCapabilites.ready) {
             throw Error('Server response has not arrived yet');
