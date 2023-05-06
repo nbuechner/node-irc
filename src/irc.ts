@@ -197,7 +197,7 @@ export class Client extends (EventEmitter as unknown as new () => TypedEmitter<C
     }
 
     constructor (
-        private server: string, requestedNick: string, opt: IrcClientOpts, existingState?: IrcClientState,
+        private server: string, requestedNick: string, opt: IrcClientOpts = {}, existingState?: IrcClientState,
         public conn?: IrcConnection
     ) {
         super();
@@ -292,7 +292,9 @@ export class Client extends (EventEmitter as unknown as new () => TypedEmitter<C
     }
 
     private onCapsList() {
-        const requiredCapabilites = [];
+        const requiredCapabilites = [
+            'message-tags',
+        ];
         if (this.opt.sasl) {
             requiredCapabilites.push('sasl');
         }
@@ -1360,7 +1362,10 @@ export class Client extends (EventEmitter as unknown as new () => TypedEmitter<C
             if (!line.length) {
                 return;
             }
-            const message = parseMessage(line, this.opt.stripColors);
+            const message = parseMessage(line, {
+                stripColors: this.opt.stripColors,
+                supportsMessageTags: true,
+            });
             try {
                 this.emit('raw', message);
             }

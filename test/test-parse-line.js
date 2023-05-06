@@ -7,14 +7,18 @@ test('irc.parseMessage', function(t) {
     const checks = testHelpers.getFixtures('parse-line');
 
     Object.keys(checks).forEach(function(line) {
-        let stripColors = false;
-        if (checks[line].hasOwnProperty('stripColors')) {
-            stripColors = checks[line].stripColors;
-            delete checks[line].stripColors;
+        let opts = {};
+        if (checks[line].opts) {
+            opts = checks[line].opts;
+            delete checks[line].opts;
         }
+        const message = parseMessage(line, opts);
         t.deepEqual(
+            {
+                ...message,
+                ...(message.tags && {tags: [...message.tags.entries()]}),
+            },
             checks[line],
-            parseMessage(line, stripColors),
             line + ' parses correctly'
         );
     });
