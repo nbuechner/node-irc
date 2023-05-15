@@ -128,8 +128,7 @@
 		},
 		"@msgid=63E1033A051D4B41B1AB1FA3CF4B243E :nick!user@host PRIVMSG #channel :Hello!": {
 			"opts": {
-				"supportsMessageTags": true,
-				"stripColors": false
+				"supportsMessageTags": true
 			},
 			"prefix": "nick!user@host",
 			"nick": "nick",
@@ -141,9 +140,37 @@
 			"tags": [ [ "msgid", "63E1033A051D4B41B1AB1FA3CF4B243E" ] ],
 			"args": ["#channel", "Hello!"]
 		},
-		":pratchett.freenode.net 324 nodebot #ubuntu +CLcntjf 5:10 #ubuntu-unregged": {
-			"prefix": "pratchett.freenode.net",
-			"server": "pratchett.freenode.net",
+		"@+example=raw+:=,escaped\\:\\s\\\\ :nick!user@example.com PRIVMSG #channel :Message": {
+			"opts": {
+				"supportsMessageTags": true
+			},
+			"user": "user",
+			"nick": "nick",
+			"prefix": "nick!user@example.com",
+			"host": "example.com",
+			"command": "PRIVMSG",
+			"rawCommand": "PRIVMSG",
+			"commandType": "normal",
+			"tags": [ [ "+example", "raw+:=,escaped; \\" ] ],
+			"args": ["#channel", "Message"]
+		},
+		"@label=123;msgid=abc;+example-client-tag=example-value :nick!user@example.com TAGMSG #channel": {
+			"opts": {
+				"supportsMessageTags": true
+			},
+			"prefix": "nick!user@example.com",
+			"nick": "nick",
+			"user": "user",
+			"host": "example.com",
+			"command": "TAGMSG",
+			"rawCommand": "TAGMSG",
+			"commandType": "normal",
+			"tags":[ [ "label", "123" ], [ "msgid", "abc" ], [ "+example-client-tag", "example-value" ] ],
+			"args": ["#channel"]
+		},
+		":host.foo.bar 324 nodebot #ubuntu +CLcntjf 5:10 #ubuntu-unregged": {
+			"prefix": "host.foo.bar",
+			"server": "host.foo.bar",
 			"command": "rpl_channelmodeis",
 			"rawCommand": "324",
 			"commandType": "reply",

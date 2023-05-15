@@ -1,0 +1,1 @@
+Add support for [message tags](https://ircv3.net/specs/extensions/message-tags).

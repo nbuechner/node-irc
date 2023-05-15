@@ -80,7 +80,29 @@ export function parseMessage(line: string, opts: Partial<ParserOptions>|boolean 
             message.tags = new Map(
                 // Strip @
                 tags.substring(1).trim().split(';').map(
-                    (tag) => tag.split('=', 2)
+                    (tag) => {
+                        const parts = tag.split('=');
+                        return [
+                            parts.splice(0, 1)[0],
+                            parts.join('=').replace(/\\(s|\\|r|n|:)/g, (char) => {
+                                // https://ircv3.net/specs/extensions/message-tags#escaping-values
+                                switch (char) {
+                                    case "\\s":
+                                        return " ";
+                                    case "\\r":
+                                        return "\r";
+                                    case "\\n":
+                                        return "\n";
+                                    case "\\\\":
+                                        return '\\';
+                                    case "\\:":
+                                        return ';';
+                                    default:
+                                        return char;
+                                }
+                            }),
+                        ]
+                    }
                 ) as Array<[string, string|undefined]>
             );
         }
