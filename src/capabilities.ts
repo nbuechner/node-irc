@@ -2,6 +2,29 @@ import EventEmitter from "events";
 import { Message } from "./parse_message";
 import TypedEmitter from "typed-emitter";
 
+export enum IrcCapability {
+    /**
+     * https://ircv3.net/specs/extensions/account-tag
+     */
+    AccountTag = "account-tag",
+    /**
+     * https://ircv3.net/specs/extensions/server-time
+     */
+    ServerTime = "server-time",
+    /**
+     * https://ircv3.net/specs/extensions/batch
+     */
+    Batch = "batch",
+    /**
+     * https://ircv3.net/specs/extensions/message-tags
+     */
+    MessageTags = "message-tags",
+    /**
+     * https://ircv3.net/specs/extensions/sasl-3.2
+     */
+    Sasl = "sasl"
+}
+
 class Capabilities {
     constructor(
         public readonly caps = new Set<string>(),
@@ -67,8 +90,13 @@ export class IrcCapabilities extends (EventEmitter as new () => IrcCapabilitiesE
         return this.userCapabilites.ready;
     }
 
-    public isSupported(capability: string) {
-        return this.userCapabilites.caps.has(capability);
+    /**
+     * Is at least one of the given capabilities supported.
+     * @param capability A named capability string.
+     * @returns True if any of the capabilities are supported, false if none of them are.
+     */
+    public isSupported(...capabilities: IrcCapability[]) {
+        return capabilities.some(capability => this.userCapabilites.caps.has(capability.toString()));
     }
 
     public get supportsSasl() {

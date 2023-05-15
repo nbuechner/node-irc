@@ -30,6 +30,7 @@ import splitLongLines from './splitLines';
 import TypedEmitter from "typed-emitter";
 import { ClientEvents, CtcpEventIndex, JoinEventIndex, MessageEventIndex, PartEventIndex } from './events';
 import { DefaultIrcSupported, IrcClientState, IrcInMemoryState, WhoisResponse } from './state';
+import { IrcCapability } from './capabilities';
 
 const lineDelimiter = new RegExp('\r\n|\r|\n');
 const MIN_DELAY_MS = 33;
@@ -293,10 +294,12 @@ export class Client extends (EventEmitter as unknown as new () => TypedEmitter<C
 
     private onCapsList() {
         const requiredCapabilites = [
-            'message-tags',
+            IrcCapability.ServerTime,
+            IrcCapability.AccountTag,
+            IrcCapability.MessageTags,
         ];
         if (this.opt.sasl) {
-            requiredCapabilites.push('sasl');
+            requiredCapabilites.push(IrcCapability.Sasl);
         }
 
         if (requiredCapabilites.length === 0) {
@@ -1364,7 +1367,12 @@ export class Client extends (EventEmitter as unknown as new () => TypedEmitter<C
             }
             const message = parseMessage(line, {
                 stripColors: this.opt.stripColors,
-                supportsMessageTags: this.state.capabilities.isSupported('message-tags'),
+                supportsMessageTags: this.state.capabilities.isSupported(
+                    IrcCapability.AccountTag,
+                    IrcCapability.Batch,
+                    IrcCapability.MessageTags,
+                    IrcCapability.ServerTime,
+                ),
             });
             try {
                 this.emit('raw', message);
