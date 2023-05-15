@@ -140,7 +140,7 @@
 			"tags": [ [ "msgid", "63E1033A051D4B41B1AB1FA3CF4B243E" ] ],
 			"args": ["#channel", "Hello!"]
 		},
-		"@+example=raw+:=,escaped\\:\\s\\\\ :nick!user@example.com PRIVMSG #channel :Message": {
+		"@+example=raw+:=,escaped\\:\\s\\b\\\\ :nick!user@example.com PRIVMSG #channel :Message": {
 			"opts": {
 				"supportsMessageTags": true
 			},
@@ -151,7 +151,7 @@
 			"command": "PRIVMSG",
 			"rawCommand": "PRIVMSG",
 			"commandType": "normal",
-			"tags": [ [ "+example", "raw+:=,escaped; \\" ] ],
+			"tags": [ [ "+example", "raw+:=,escaped; b\\" ] ],
 			"args": ["#channel", "Message"]
 		},
 		"@label=123;msgid=abc;+example-client-tag=example-value :nick!user@example.com TAGMSG #channel": {
