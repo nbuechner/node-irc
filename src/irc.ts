@@ -620,7 +620,7 @@ export class Client extends (EventEmitter as unknown as new () => TypedEmitter<C
         const channelsForNick: string[] = [];
 
         // finding what channels a user is in
-        Object.entries(this.state.chans).forEach(([channame, nickChannel]) => {
+        this.state.chans.forEach((nickChannel, channame) => {
             const chanUser = message.nick && nickChannel.users.get(message.nick);
             if (message.nick && chanUser) {
                 nickChannel.users.set(message.args[0], chanUser);
@@ -848,9 +848,9 @@ export class Client extends (EventEmitter as unknown as new () => TypedEmitter<C
     private onKill(message: Message) {
         const nick = message.args[0];
         const killChannels = [];
-        for (const [channame, killChannel] of Object.entries(this.state.chans)) {
-            if (message.nick && message.nick in killChannel.users) {
-                delete killChannel.users[message.nick];
+        for (const [channame, killChannel] of this.state.chans.entries()) {
+            if (message.nick && killChannel.users.has(message.nick)) {
+                killChannel.users.delete(message.nick);
                 killChannels.push(channame);
             }
         }
@@ -910,9 +910,9 @@ export class Client extends (EventEmitter as unknown as new () => TypedEmitter<C
         const quitChannels: string[] = [];
 
         // finding what channels a user is in?
-        for (const [channame, quitChannel] of Object.entries(this.state.chans)) {
-            if (message.nick && message.nick in quitChannel.users) {
-                delete quitChannel.users[message.nick];
+        for (const [channame, quitChannel] of this.state.chans.entries()) {
+            if (message.nick && quitChannel.users.has(message.nick)) {
+                quitChannel.users.delete(message.nick);
                 quitChannels.push(channame);
             }
         }

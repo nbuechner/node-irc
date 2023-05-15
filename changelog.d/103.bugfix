@@ -1,0 +1,3 @@
+Users that quit IRC network now leave Matrix channel properly.
+Users that are killed from IRC network now leave Matrix channel properly.
+It also fixes nick changes: old nick leaves Matrix room and new nick joins Matrix room.
