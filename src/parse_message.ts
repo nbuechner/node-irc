@@ -84,7 +84,7 @@ export function parseMessage(line: string, opts: Partial<ParserOptions>|boolean 
                         const parts = tag.split('=');
                         return [
                             parts.splice(0, 1)[0],
-                            parts.join('=').replace(/\\(s|\\|r|n|:)/g, (char) => {
+                            parts.join('=').replace(/\\./g, (char) => {
                                 // https://ircv3.net/specs/extensions/message-tags#escaping-values
                                 switch (char) {
                                     case "\\s":
@@ -98,7 +98,7 @@ export function parseMessage(line: string, opts: Partial<ParserOptions>|boolean 
                                     case "\\:":
                                         return ';';
                                     default:
-                                        return char;
+                                        return char[1];
                                 }
                             }),
                         ]
