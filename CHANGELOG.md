@@ -1,3 +1,20 @@
+2.0.1 (2023-05-18)
+==================
+
+Bugfixes
+--------
+
+- Users that quit IRC network now leave Matrix channel properly.
+  Users that are killed from IRC network now leave Matrix channel properly.
+  It also fixes nick changes: old nick leaves Matrix room and new nick joins Matrix room. ([\#103](https://github.com/matrix-org/node-irc/issues/103))
+
+
+Internal Changes
+----------------
+
+- Increase the integration test timeout to 15s. ([\#104](https://github.com/matrix-org/node-irc/issues/104))
+
+
 2.0.0 (2023-04-26)
 ==================
 
