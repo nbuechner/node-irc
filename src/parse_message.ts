@@ -22,8 +22,9 @@ interface ParserOptions {
     stripColors: boolean;
 }
 
-const IRC_LINE_MATCH_REGEX = /^:(?<prefix>[^ ]+) +(?<content>.+)/;
-const IRC_LINE_MATCH_WITH_TAGS_REGEX = /^(?<tags>@[^ ]+ )?:(?<prefix>[^ ]+) +(?<content>.+)/;
+const IRC_LINE_MATCH_REGEX = /^(?<prefix>:[^ ]+) +(?<content>.+)/;
+const IRC_LINE_MATCH_WITH_TAGS_REGEX = /^(?<tags>@[^ ]+ )?(?<prefix>:[^ ]+)? +(?<content>.+)/;
+const IRC_PREFIX_REGEX = /^(?<nick>[_a-zA-Z0-9\[\]\\`^{}|-]*)?(!(?<user>[^@]+))?@?(?<host>.*)$/
 
 const IRC_COMMAND_REGEX = /^([^ ]+) */;
 
@@ -54,22 +55,24 @@ export function parseMessage(line: string, opts: Partial<ParserOptions>|boolean 
         line = stripColorsAndStyle(line);
     }
 
-    // Parse prefix
+    // Parse prefix and tags
     let match = line.match(opts.supportsMessageTags ? IRC_LINE_MATCH_WITH_TAGS_REGEX : IRC_LINE_MATCH_REGEX);
+
+    // Assume content is the full line unless we pull a prefix and/or tags out.
     let content = line;
+
     if (match) {
         const { prefix, tags, content: ctnt } = match.groups || {};
         content = ctnt;
-        if (!prefix) {
-            throw Error('No prefix on message');
-        }
-        message.prefix = prefix;
-        const prefixMatch = message.prefix.match(/^([_a-zA-Z0-9\[\]\\`^{}|-]*)(!([^@]+)@(.*))?$/);
+        message.prefix = prefix?.substring(1);
+        const prefixMatch = message.prefix?.match(IRC_PREFIX_REGEX);
 
-        if (prefixMatch) {
-            message.nick = prefixMatch[1];
-            message.user = prefixMatch[3];
-            message.host = prefixMatch[4];
+        console.log("PREFIX:", prefixMatch, message.prefix);
+
+        if (prefixMatch?.groups) {
+            message.nick = prefixMatch.groups.nick;
+            message.user = prefixMatch.groups.user;
+            message.host = prefixMatch.groups.host;
         }
         else {
             message.server = message.prefix;
@@ -133,7 +136,6 @@ export function parseMessage(line: string, opts: Partial<ParserOptions>|boolean 
     if (parameters.search(/^:| +:/) !== -1) {
         match = parameters.match(/(.*?)(?:^:| +:)(.*)/);
         if (!match) {
-            console.log('Egg!');
             throw Error('Invalid format, could not parse parameters');
         }
         middle = match[1].trimEnd();
