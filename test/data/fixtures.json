@@ -181,6 +181,22 @@
 			"commandType": "normal",
 			"command": "PING",
 			"rawCommand": "PING"
+		},
+		"PRIVMSG #test :Hello nodebot!": {
+			"command": "PRIVMSG",
+			"rawCommand": "PRIVMSG",
+			"commandType": "normal",
+			"args": ["#test", "Hello nodebot!"]
+		},
+		"@label=123;msgid=abc;+example-client-tag=example-value TAGMSG #channel": {
+			"opts": {
+				"supportsMessageTags": true
+			},
+			"command": "TAGMSG",
+			"rawCommand": "TAGMSG",
+			"commandType": "normal",
+			"tags":[ [ "label", "123" ], [ "msgid", "abc" ], [ "+example-client-tag", "example-value" ] ],
+			"args": ["#channel"]
 		}
 	},
 	"433-before-001": {
