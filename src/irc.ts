@@ -1536,8 +1536,10 @@ export class Client extends (EventEmitter as unknown as new () => TypedEmitter<C
         if (this.requestedDisconnect) {
             return;
         }
+
+        const msg = args.join(' ').replace(/\r|\n/g, "");
         this.state.lastSendTime = Date.now();
-        this.conn.write(args.join(' ') + '\r\n');
+        this.conn.write(msg + '\r\n');
     }
 
     public join(channel: string, callback?: (...args: unknown[]) => void) {
