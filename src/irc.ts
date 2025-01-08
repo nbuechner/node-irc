@@ -1564,6 +1564,8 @@ export class Client extends (EventEmitter as unknown as new () => TypedEmitter<C
         if (typeof messageOrCallback === 'function') {
             callback = messageOrCallback;
             message = undefined;
+        } else {
+            message = messageOrCallback;
         }
         if (typeof (callback) === 'function') {
             this.once('part' + channel as PartEventIndex, callback);
