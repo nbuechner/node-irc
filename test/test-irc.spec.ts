@@ -57,5 +57,33 @@ describe('IRC client basics', () => {
 
             expect.assertions(expected.sent.length + expected.received.length);
         });
-    })
+    });
+
+    test('part reasons', async () => {
+        const mock = new MockIrcd();
+        const client = new Client('localhost', 'testbot', {debug: true, port: await mock.listen()});
+
+        mock.server.on('connection', function() {
+            mock.send(greeting);
+        });
+
+        client.on('registered', async () => {
+            await client.part('#testchannel', 'bye');
+            client.disconnect();
+        });
+
+        await new Promise<void>((resolve, reject) => {
+            mock.on('end', function() {
+                mock.close();
+                const msgs = mock.getIncomingMsgs();
+
+                try {
+                    expect(msgs.filter(msg => msg.startsWith('PART') && msg.endsWith('bye'))).toHaveLength(1);
+                } catch (err) {
+                    reject(err);
+                }
+                resolve();
+            });
+        });
+    });
 });

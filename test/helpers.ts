@@ -7,7 +7,7 @@ import EventEmitter from "node:events";
 import { AddressInfo } from "node:net";
 
 export class MockIrcd extends EventEmitter {
-    incoming: unknown[] = [];
+    incoming: string[] = [];
     outgoing: unknown[] = [];
     server: net.Server;
 
