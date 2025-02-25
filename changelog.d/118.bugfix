@@ -1,1 +1,0 @@
-Ensure channel.users is an accurate representation of the NAMES response after updates, removing stale users.

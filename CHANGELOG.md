@@ -1,3 +1,21 @@
+# 3.1.0 (2025-02-25)
+
+### Features
+
+- Handle error 415 (+R/+M). ([\#114](https://github.com/matrix-org/node-irc/issues/114))
+
+### Bugfixes
+
+- Make sure PART reasons aren't being dropped ([887cacd](https://github.com/matrix-org/node-irc/commit/887cacdd62f81a8e80fb4f9d38800d2c5600c2e1))
+- Fix reconnect loop due to the close listener being called on socket destruction. ([\#115](https://github.com/matrix-org/node-irc/issues/115))
+- Fix auto reconnect due to event listeners not being called. ([\#116](https://github.com/matrix-org/node-irc/issues/116))
+- Fix nick changes not being bridged to matrix. ([\#117](https://github.com/matrix-org/node-irc/issues/117))
+- Ensure channel.users is an accurate representation of the NAMES response after updates, removing stale users. ([\#118](https://github.com/matrix-org/node-irc/issues/118))
+
+# Internal changes
+
+- Remove newlines (except trailing ones) from _send() payloads ([37cb805](https://github.com/matrix-org/node-irc/commit/37cb80513d0411c2cac5fdbba1399d474231d0c8))
+
 3.0.0 (2024-03-27)
 ==================
 
