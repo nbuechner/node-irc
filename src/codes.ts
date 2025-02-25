@@ -398,7 +398,7 @@ export const replyCodes = {
         type: 'error'
     },
     // Used in oftc-hybrid-1.7.3 and Solanum.
-    // Returned when a channel requires its users to have a NickServ account to 
+    // Returned when a channel requires its users to have a NickServ account to
     // talk.
     415: {
         name: 'err_needreggednick',
