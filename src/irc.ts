@@ -219,12 +219,12 @@ export class Client extends (EventEmitter as unknown as new () => TypedEmitter<C
         if (opt.channelPrefixes) {
             this.state.supportedState.channel.types = opt.channelPrefixes;
         }
-        this.state.capabilities.once('serverCapabilitesReady', () => {
+        this.state.capabilities.on('serverCapabilitesReady', () => {
             this.onCapsList();
             // Flush on capabilities modified
             this.state.flush?.();
         })
-        this.state.capabilities.once('userCapabilitesReady', () => {
+        this.state.capabilities.on('userCapabilitesReady', () => {
             this.onCapsConfirmed();
             // Flush on capabilities modified
             this.state.flush?.();
@@ -630,9 +630,8 @@ export class Client extends (EventEmitter as unknown as new () => TypedEmitter<C
 
         // finding what channels a user is in
         this.state.chans.forEach((nickChannel, channame) => {
-            const chanUser = message.nick && nickChannel.users.get(message.nick);
-            if (message.nick && chanUser) {
-                nickChannel.users.set(message.args[0], chanUser);
+            if (message.nick && nickChannel.users.has(message.nick)) {
+                nickChannel.users.set(message.args[0], nickChannel.users.get(message.nick)!);
                 nickChannel.users.delete(message.nick);
                 channelsForNick.push(channame);
             }
@@ -684,25 +683,29 @@ export class Client extends (EventEmitter as unknown as new () => TypedEmitter<C
                     }
                 }
                 if (knownPrefixes.length > 0) {
-                    channel.users.set(match[2], knownPrefixes);
+                    channel.tmpUsers.set(match[2], knownPrefixes);
                 }
                 else {
                     // recombine just in case this server allows weird chars in the nick.
                     // We know it isn't a mode char.
-                    channel.users.set(match[1] + match[2], '');
+                    channel.tmpUsers.set(match[1] + match[2], '');
                 }
             }
         });
-        // If the channel user list was modified, flush.
-        if (users.length) {
-            this.state.flush?.()
-        }
     }
 
     private onReplyNameEnd(message: Message) {
         this._casemap(message, 1);
         const channel = this.chanData(message.args[1]);
         if (channel) {
+            channel.users.clear();
+            channel.tmpUsers.forEach((modes, user) => {
+                channel.users.set(user, modes);
+            });
+            channel.tmpUsers.clear();
+
+            this.state.flush?.();
+
             this.emit('names', message.args[1], channel.users);
             this._send('MODE', message.args[1]);
         }
@@ -1166,6 +1169,7 @@ export class Client extends (EventEmitter as unknown as new () => TypedEmitter<C
                 key: key,
                 serverName: name,
                 users: new Map(),
+                tmpUsers: new Map(),
                 mode: '',
                 modeParams: new Map(),
             });
@@ -1272,6 +1276,7 @@ export class Client extends (EventEmitter as unknown as new () => TypedEmitter<C
 
         // destroy old socket before allocating a new one
         if (this.isOurSocket && this.conn) {
+            this.unbindListeners();
             this.conn.destroy();
             this.conn = undefined;
         }
@@ -1425,6 +1430,14 @@ export class Client extends (EventEmitter as unknown as new () => TypedEmitter<C
         });
     }
 
+    private unbindListeners() {
+        (
+            ['data', 'end', 'close', 'timeout', 'error'] as (keyof IrcConnectionEventsMap)[]
+        ).forEach(evtType => {
+            this.conn?.removeAllListeners(evtType);
+        });
+    }
+
     private reconnect(retryCount: number) {
         if (!this.isOurSocket) {
             // Cannot reconnect if the socket is not ours.
@@ -1455,11 +1468,7 @@ export class Client extends (EventEmitter as unknown as new () => TypedEmitter<C
      */
     public destroy() {
         util.log('Destroying connection');
-        (
-            ['data', 'end', 'close', 'timeout', 'error'] as (keyof IrcConnectionEventsMap)[]
-        ).forEach(evtType => {
-            this.conn?.removeAllListeners(evtType);
-        });
+        this.unbindListeners();
         if (this.isOurSocket) {
             this.disconnect();
         }
