@@ -1,0 +1,23 @@
+export declare const codes: {
+    white: string;
+    black: string;
+    dark_blue: string;
+    dark_green: string;
+    light_red: string;
+    dark_red: string;
+    magenta: string;
+    orange: string;
+    yellow: string;
+    light_green: string;
+    cyan: string;
+    light_cyan: string;
+    light_blue: string;
+    light_magenta: string;
+    gray: string;
+    light_gray: string;
+    bold: string;
+    underline: string;
+    reset: string;
+};
+export declare function wrap(color: keyof (typeof codes), text: string, resetColor: keyof (typeof codes)): string;
+export declare function stripColorsAndStyle(str: string): string;
